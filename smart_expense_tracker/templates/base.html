@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}SmartSpend{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="{{ url_for('index') }}">◈ SmartSpend</a>
+  <nav><a href="{{ url_for('index') }}">Dashboard</a><a href="{{ url_for('add_transaction') }}">Add transaction</a><a href="{{ url_for('budgets') }}">Budgets</a></nav>
+</header>
+<main class="container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}<section class="messages">{% for category, message in messages %}<div class="alert {{ category }}">{{ message }}</div>{% endfor %}</section>{% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+<footer>SmartSpend · Personal finance, made clearer</footer>
+</body>
+</html>

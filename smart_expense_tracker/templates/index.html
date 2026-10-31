@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · SmartSpend{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">OVERVIEW</p><h1>Your money at a glance</h1><p class="muted">Track spending, spot patterns and stay within budget.</p></div><a class="button" href="{{ url_for('add_transaction') }}">＋ Add transaction</a></div>
+<form class="filterbar" method="get">
+  <label>Month <input type="month" name="month" value="{{ selected_month }}"></label>
+  <label>Search <input name="q" value="{{ search }}" placeholder="Description or category"></label>
+  <label>Category <select name="category"><option value="">All categories</option>{% for c in categories %}<option value="{{ c }}" {% if selected_category==c %}selected{% endif %}>{{ c }}</option>{% endfor %}</select></label>
+  <label>Type <select name="type"><option value="">All</option><option value="income" {% if selected_type=='income' %}selected{% endif %}>Income</option><option value="expense" {% if selected_type=='expense' %}selected{% endif %}>Expense</option></select></label>
+  <button class="button secondary">Apply</button>
+</form>
+<section class="stats">
+  <article class="stat"><span>Income this month</span><strong class="green">{{ income|money }}</strong><small>Money received</small></article>
+  <article class="stat"><span>Expenses this month</span><strong class="red">{{ expenses|money }}</strong><small>Money spent</small></article>
+  <article class="stat"><span>Net balance</span><strong>{{ balance|money }}</strong><small>Income minus expenses</small></article>
+</section>
+{% if budget_alerts %}
+<section class="panel"><h2>Budget alerts</h2><p class="muted">These categories have used at least 80% of their budget.</p><div class="alert-list">{% for b in budget_alerts %}<div><b>{{ b.category }}</b><span>{{ b.spent|money }} / {{ b.budget|money }} ({{ "%.0f"|format(b.percent) }}%)</span></div>{% endfor %}</div></section>
+{% endif %}
+<div class="two-col">
+  <section class="panel"><div class="panel-head"><h2>Spending by category</h2><span class="muted">{{ selected_month }}</span></div>
+    {% if category_rows %}<canvas id="categoryChart" height="230"></canvas>{% else %}<p class="empty">No expense data for this month yet.</p>{% endif %}
+  </section>
+  <section class="panel"><h2>Budget progress</h2>
+    {% for b in budget_rows %}<div class="budget-row"><div><b>{{ b.category }}</b><span>{{ b.spent|money }} / {{ b.budget|money }}</span></div><div class="progress"><i style="width: {{ [100, (b.spent / b.budget * 100)]|min }}%"></i></div></div>{% else %}<p class="empty">No budgets set for this month. <a href="{{ url_for('budgets', month=selected_month) }}">Create one</a>.</p>{% endfor %}
+  </section>
+</div>
+<section class="panel">
+  <div class="panel-head"><h2>Transactions</h2><a class="text-link" href="{{ url_for('export_csv', month=selected_month) }}">↓ Export CSV</a></div>
+  <div class="table-wrap"><table><thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Type</th><th class="right">Amount</th><th></th></tr></thead><tbody>
+  {% for t in transactions %}<tr><td>{{ t.date }}</td><td><b>{{ t.title }}</b></td><td><span class="tag">{{ t.category }}</span></td><td><span class="{{ t.type }}">{{ t.type|title }}</span></td><td class="right amount {{ t.type }}">{{ "+" if t.type=="income" else "−" }}{{ t.amount|money }}</td><td class="right"><form method="post" action="{{ url_for('delete_transaction', transaction_id=t.id) }}" onsubmit="return confirm('Delete this transaction?')"><button class="delete" aria-label="Delete transaction">×</button></form></td></tr>
+  {% else %}<tr><td colspan="6" class="empty">No transactions match these filters.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% if category_rows %}<script>
+const labels = {{ category_rows|map(attribute='category')|list|tojson }};
+const values = {{ category_rows|map(attribute='total')|list|tojson }};
+new Chart(document.getElementById('categoryChart'), {type:'doughnut',data:{labels,datasets:[{data:values,borderWidth:0}]},options:{plugins:{legend:{position:'bottom'}},cutout:'65%'}});
+</script>{% endif %}
+{% endblock %}
