@@ -104,18 +104,6 @@ http://127.0.0.1:5000
 
 Your Smart Expense Tracker application is now running!
 
-## 📸 Application Screenshots
-
-Add your application screenshots here after running the project.
-
-Example:
-
-```markdown
-![Dashboard](screenshots/dashboard.png)
-![Add Transaction](screenshots/add-transaction.png)
-![Budget Management](screenshots/budget.png)
-```
-
 ## 🎯 Project Objective
 
 The main objective of this project is to develop a user-friendly expense management system that helps individuals track daily transactions, control unnecessary spending, manage monthly budgets, and improve financial awareness.
